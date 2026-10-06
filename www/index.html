@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SkyWay</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--tx:#10243e;--mut:#6b7a90;--pri:#0b5fff;--ok:#12a150;--warn:#e08a00;--bad:#d93025;--bd:#e3e9f2}
+@media(prefers-color-scheme:dark){:root{--bg:#0c1522;--card:#142235;--tx:#e8eef7;--mut:#8ea0b8;--bd:#22344d}}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);padding-top:env(safe-area-inset-top)}
+header{background:var(--pri);color:#fff;padding:18px 16px 14px;font-weight:700;font-size:20px}
+main{padding:14px 14px 90px}
+input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:center}
+.big{font-size:28px;font-weight:700}.mut{color:var(--mut);font-size:13px}
+.badge{padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;color:#fff}
+.On{background:var(--ok)}.Delayed{background:var(--warn)}.Cancelled{background:var(--bad)}.Boarding{background:var(--pri)}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:14px;border:0;background:none;color:var(--mut);font-size:15px;font-weight:600}
+nav button.act{color:var(--pri)}
+.bp{padding:0;overflow:hidden}.bp .top{background:var(--pri);color:#fff;padding:14px}
+.bp .body{padding:14px}.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}
+.grid b{display:block;font-size:17px}.bars{display:flex;height:70px;align-items:stretch;margin-top:16px;gap:2px;justify-content:center}
+.bars i{background:var(--tx);display:block}.sel{width:100%;padding:12px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px;margin-bottom:12px}
+</style></head><body>
+<header>✈ SkyWay</header>
+<main id="m"></main>
+<nav><button id="t1" onclick="tab(1)">Flight Status</button><button id="t2" onclick="tab(2)">Boarding Pass</button></nav>
+<script>
+const FLIGHTS=[
+{no:"SW101",from:"HYD",fc:"Hyderabad",to:"DEL",tc:"Delhi",dep:"06:30",arr:"08:40",st:"On",gate:"A12",term:"T1"},
+{no:"SW202",from:"BLR",fc:"Bengaluru",to:"BOM",tc:"Mumbai",dep:"09:15",arr:"11:05",st:"Delayed",gate:"B04",term:"T2"},
+{no:"SW315",from:"DEL",fc:"Delhi",to:"DXB",tc:"Dubai",dep:"13:45",arr:"16:30",st:"Boarding",gate:"C21",term:"T3"},
+{no:"SW408",from:"MAA",fc:"Chennai",to:"SIN",tc:"Singapore",dep:"22:10",arr:"05:55",st:"Cancelled",gate:"-",term:"T4"},
+{no:"SW512",from:"BOM",fc:"Mumbai",to:"LHR",tc:"London",dep:"02:20",arr:"07:50",st:"On",gate:"D09",term:"T2"}];
+const PASSES=[
+{pax:"ARJUN / RAO MR",no:"SW101",seat:"14A",cls:"Economy",seq:"042",pnr:"X7K2QP",board:"06:00",date:"07 OCT 2026"},
+{pax:"ARJUN / RAO MR",no:"SW315",seat:"2C",cls:"Business",seq:"007",pnr:"M3T9ZD",board:"13:10",date:"12 OCT 2026"}];
+const m=document.getElementById("m");let q="";
+function tab(n){t1.className=n==1?"act":"";t2.className=n==2?"act":"";n==1?status():pass(0)}
+function status(){m.innerHTML=`<input id="q" placeholder="Search flight no. or city (e.g. SW101, Delhi)" value="${q}" oninput="q=this.value;list()"><div id="l"></div>`;list()}
+function list(){const s=q.trim().toLowerCase();const r=FLIGHTS.filter(f=>!s||[f.no,f.from,f.fc,f.to,f.tc].some(x=>x.toLowerCase().includes(s)));
+document.getElementById("l").innerHTML=r.map(f=>`<div class="card"><div class="row"><b>${f.no}</b><span class="badge ${f.st}">${f.st}</span></div>
+<div class="row" style="margin-top:10px"><div><div class="big">${f.from}</div><div class="mut">${f.fc}</div></div><div>✈</div><div style="text-align:right"><div class="big">${f.to}</div><div class="mut">${f.tc}</div></div></div>
+<div class="row mut" style="margin-top:10px"><span>Dep ${f.dep} → Arr ${f.arr}</span><span>${f.term} · Gate ${f.gate}</span></div></div>`).join("")||`<p class="mut">No flights found.</p>`}
+function pass(i){const p=PASSES[i],f=FLIGHTS.find(x=>x.no==p.no);
+let seed=[...p.pnr+p.no].reduce((a,c)=>a*31+c.charCodeAt(0)>>>0,7),bars="";
+for(let k=0;k<48;k++){seed=(seed*1103515245+12345)>>>0;bars+=`<i style="width:${1+(seed>>16)%4}px"></i>`}
+m.innerHTML=`<select class="sel" onchange="pass(this.value)">${PASSES.map((x,j)=>`<option value="${j}" ${j==i?"selected":""}>${x.no} · ${x.date}</option>`).join("")}</select>
+<div class="card bp"><div class="top"><div class="row"><b>SkyWay Boarding Pass</b><span>${p.cls}</span></div>
+<div class="row" style="margin-top:12px"><div><div class="big">${f.from}</div><div>${f.fc}</div></div><div>✈</div><div style="text-align:right"><div class="big">${f.to}</div><div>${f.tc}</div></div></div></div>
+<div class="body"><div class="mut">PASSENGER</div><b>${p.pax}</b>
+<div class="grid"><div><span class="mut">FLIGHT</span><b>${p.no}</b></div><div><span class="mut">DATE</span><b>${p.date}</b></div><div><span class="mut">SEAT</span><b>${p.seat}</b></div>
+<div><span class="mut">GATE</span><b>${f.gate}</b></div><div><span class="mut">BOARDING</span><b>${p.board}</b></div><div><span class="mut">DEPARTS</span><b>${f.dep}</b></div>
+<div><span class="mut">PNR</span><b>${p.pnr}</b></div><div><span class="mut">SEQ</span><b>${p.seq}</b></div><div><span class="mut">STATUS</span><b>${f.st}</b></div></div>
+<div class="bars">${bars}</div><div class="mut" style="text-align:center;margin-top:6px">${p.pnr} ${p.no} ${p.seat}</div></div></div>`}
+tab(1);
+</script></body></html>
