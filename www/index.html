@@ -8,37 +8,61 @@
 @media(prefers-color-scheme:dark){:root{--bg:#0c1522;--card:#142235;--tx:#e8eef7;--mut:#8ea0b8;--bd:#22344d}}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);padding-top:env(safe-area-inset-top)}
 header{background:var(--pri);color:#fff;padding:18px 16px 14px;font-weight:700;font-size:20px}
-main{padding:14px 14px 90px}
+main{padding:14px 14px calc(150px + env(safe-area-inset-bottom));max-width:850px;margin:auto}
 input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px;margin-bottom:12px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
 .row{display:flex;justify-content:space-between;align-items:center}
 .big{font-size:28px;font-weight:700}.mut{color:var(--mut);font-size:13px}
 .badge{padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;color:#fff}
 .On{background:var(--ok)}.Delayed{background:var(--warn)}.Cancelled{background:var(--bad)}.Boarding{background:var(--pri)}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;padding:14px;border:0;background:none;color:var(--mut);font-size:15px;font-weight:600}
+nav{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
+nav button{padding:14px 6px;border:0;background:none;color:var(--mut);font-size:14px;font-weight:600;cursor:pointer}
 nav button.act{color:var(--pri)}
 .bp{padding:0;overflow:hidden}.bp .top{background:var(--pri);color:#fff;padding:14px}
 .bp .body{padding:14px}.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}
 .grid b{display:block;font-size:17px}.bars{display:flex;height:70px;align-items:stretch;margin-top:16px;gap:2px;justify-content:center}
 .bars i{background:var(--tx);display:block}.sel{width:100%;padding:12px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px;margin-bottom:12px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+h1{font-size:24px;margin:4px 0 10px}h2{font-size:18px;margin:0 0 12px}
+.demo{padding:10px 16px;margin:0;color:var(--mut);font-size:12px;border-bottom:1px solid var(--bd)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 16px}
+.action{border:0;border-radius:10px;background:var(--pri);color:#fff;padding:12px 16px;font:inherit;cursor:pointer}
+.notice{color:var(--bad);padding:10px 16px;margin:0}.seat-map{max-width:360px;margin:16px auto}
+.seat-row{display:grid;grid-template-columns:24px repeat(3,1fr) 18px repeat(3,1fr);gap:6px;margin-bottom:8px;align-items:center}
+.seat-row.business{grid-template-columns:24px repeat(2,1fr) 18px repeat(2,1fr)}
+.seat{min-height:42px;border:1px solid var(--pri);border-radius:8px;color:var(--tx);background:var(--card);cursor:pointer}
+.seat:disabled{background:var(--bd);border-color:var(--bd);color:var(--mut);cursor:not-allowed}
+.seat.selected{background:var(--pri);color:#fff}.aisle{width:18px}
+.summary{font-size:22px;font-weight:700;margin:12px 0}.amenities{padding-left:20px;line-height:1.9}
+:focus-visible{outline:3px solid var(--warn);outline-offset:3px}
+@media(min-width:700px){nav{grid-template-columns:repeat(6,1fr)}main{padding-bottom:100px}}
 </style></head><body>
 <header>✈ SkyWay</header>
+<p class="demo">Offline demo · All schedules, fares, fees and airport details are sample data. No real bookings, payments or check-in.</p>
+<p id="storage-warning" class="notice" role="alert" hidden></p>
 <main id="m"></main>
-<nav><button id="t1" onclick="tab(1)">Flight Status</button><button id="t2" onclick="tab(2)">Boarding Pass</button></nav>
+<nav aria-label="Main navigation"><button id="t1" onclick="tab(1)">Flight Status</button><button id="t2" onclick="tab(2)">Boarding Pass</button><button id="t3" onclick="tab(3)">Find Flights</button><button id="t4" onclick="tab(4)">Choose Seat</button><button id="t5" onclick="tab(5)">Baggage</button><button id="t6" onclick="tab(6)">Airports</button></nav>
 <script>
 const FLIGHTS=[
 {no:"SW101",from:"HYD",fc:"Hyderabad",to:"DEL",tc:"Delhi",dep:"06:30",arr:"08:40",st:"On",gate:"A12",term:"T1"},
 {no:"SW202",from:"BLR",fc:"Bengaluru",to:"BOM",tc:"Mumbai",dep:"09:15",arr:"11:05",st:"Delayed",gate:"B04",term:"T2"},
 {no:"SW315",from:"DEL",fc:"Delhi",to:"DXB",tc:"Dubai",dep:"13:45",arr:"16:30",st:"Boarding",gate:"C21",term:"T3"},
 {no:"SW408",from:"MAA",fc:"Chennai",to:"SIN",tc:"Singapore",dep:"22:10",arr:"05:55",st:"Cancelled",gate:"-",term:"T4"},
-{no:"SW512",from:"BOM",fc:"Mumbai",to:"LHR",tc:"London",dep:"02:20",arr:"07:50",st:"On",gate:"D09",term:"T2"}];
+{no:"SW512",from:"BOM",fc:"Mumbai",to:"LHR",tc:"London",dep:"02:20",arr:"07:50",st:"On",gate:"D09",term:"T2"},
+{no:"SW116",from:"HYD",fc:"Hyderabad",to:"DEL",tc:"Delhi",dep:"17:30",arr:"19:40",st:"On",gate:"A08",term:"T1"},
+{no:"SW220",from:"BOM",fc:"Mumbai",to:"BLR",tc:"Bengaluru",dep:"14:00",arr:"15:50",st:"On",gate:"B06",term:"T2"},
+{no:"SW330",from:"DEL",fc:"Delhi",to:"DXB",tc:"Dubai",dep:"20:15",arr:"23:00",st:"On",gate:"C14",term:"T3"},
+{no:"SW420",from:"MAA",fc:"Chennai",to:"SIN",tc:"Singapore",dep:"10:10",arr:"17:55",st:"On",gate:"D02",term:"T4"},
+{no:"SW610",from:"DEL",fc:"Delhi",to:"BOM",tc:"Mumbai",dep:"11:20",arr:"13:30",st:"On",gate:"A03",term:"T3"}];
 const PASSES=[
 {pax:"ARJUN / RAO MR",no:"SW101",seat:"14A",cls:"Economy",seq:"042",pnr:"X7K2QP",board:"06:00",date:"07 OCT 2026"},
 {pax:"ARJUN / RAO MR",no:"SW315",seat:"2C",cls:"Business",seq:"007",pnr:"M3T9ZD",board:"13:10",date:"12 OCT 2026"}];
 const m=document.getElementById("m");let q="";
-function tab(n){t1.className=n==1?"act":"";t2.className=n==2?"act":"";n==1?status():pass(0)}
-function status(){m.innerHTML=`<input id="q" placeholder="Search flight no. or city (e.g. SW101, Delhi)" value="${q}" oninput="q=this.value;list()"><div id="l"></div>`;list()}
+function tab(n){
+for(let i=1;i<=6;i++){const button=document.getElementById(`t${i}`);button.className=n===i?"act":"";button.setAttribute("aria-current",n===i?"page":"false")}
+[status,()=>pass(0),findFlights,()=>seats(0),baggage,()=>airport("HYD")][n-1]();
+}
+function status(){m.innerHTML=`<input id="q" aria-label="Search flight status" placeholder="Search flight no. or city (e.g. SW101, Delhi)"><div id="l" aria-live="polite"></div>`;const input=document.getElementById("q");input.value=q;input.addEventListener("input",()=>{q=input.value;list()});list()}
 function list(){const s=q.trim().toLowerCase();const r=FLIGHTS.filter(f=>!s||[f.no,f.from,f.fc,f.to,f.tc].some(x=>x.toLowerCase().includes(s)));
 document.getElementById("l").innerHTML=r.map(f=>`<div class="card"><div class="row"><b>${f.no}</b><span class="badge ${f.st}">${f.st}</span></div>
 <div class="row" style="margin-top:10px"><div><div class="big">${f.from}</div><div class="mut">${f.fc}</div></div><div>✈</div><div style="text-align:right"><div class="big">${f.to}</div><div class="mut">${f.tc}</div></div></div>
@@ -54,5 +78,89 @@ m.innerHTML=`<select class="sel" onchange="pass(this.value)">${PASSES.map((x,j)=
 <div><span class="mut">GATE</span><b>${f.gate}</b></div><div><span class="mut">BOARDING</span><b>${p.board}</b></div><div><span class="mut">DEPARTS</span><b>${f.dep}</b></div>
 <div><span class="mut">PNR</span><b>${p.pnr}</b></div><div><span class="mut">SEQ</span><b>${p.seq}</b></div><div><span class="mut">STATUS</span><b>${f.st}</b></div></div>
 <div class="bars">${bars}</div><div class="mut" style="text-align:center;margin-top:6px">${p.pnr} ${p.no} ${p.seat}</div></div></div>`}
+const FARES={SW101:4599,SW202:3899,SW315:12999,SW408:15999,SW512:42999,SW116:5199,SW220:4199,SW330:14499,SW420:16999,SW610:4899};
+const AIRPORTS=[
+{code:"HYD",city:"Hyderabad",name:"Rajiv Gandhi International",terminal:"T1",transfer:"Airport bus to the city: every 30 minutes",amenities:["SkyWay lounge near Gate A10, 05:00-23:00","Food court near Gate A06","Free Wi-Fi: SkyWay-Demo-HYD"],tip:"Allow 2 hours before a domestic departure."},
+{code:"DEL",city:"Delhi",name:"Indira Gandhi International",terminal:"T3",transfer:"Airport Express metro: every 15 minutes",amenities:["SkyWay lounge near Gate C18, open 24 hours","Family room near Gate C10","Free Wi-Fi: SkyWay-Demo-DEL"],tip:"Allow 3 hours before an international departure."},
+{code:"BLR",city:"Bengaluru",name:"Kempegowda International",terminal:"T2",transfer:"Airport bus to the city: every 20 minutes",amenities:["SkyWay lounge near Gate B02, 04:00-23:00","Charging points near Gate B04","Free Wi-Fi: SkyWay-Demo-BLR"],tip:"Keep your photo ID ready at the terminal entrance."},
+{code:"BOM",city:"Mumbai",name:"Chhatrapati Shivaji Maharaj International",terminal:"T2",transfer:"Prepaid taxi desk outside arrivals",amenities:["SkyWay lounge near Gate D05, open 24 hours","Food court near Gate B06","Free Wi-Fi: SkyWay-Demo-BOM"],tip:"Plan extra travel time for city traffic."},
+{code:"MAA",city:"Chennai",name:"Chennai International",terminal:"T4",transfer:"Metro station connected by a walkway",amenities:["SkyWay lounge near Gate D01, 05:00-23:00","Baby care room near Gate D04","Free Wi-Fi: SkyWay-Demo-MAA"],tip:"Check the terminal on your boarding pass before travelling."},
+{code:"DXB",city:"Dubai",name:"Dubai International",terminal:"T3",transfer:"Metro and taxi desks outside arrivals",amenities:["SkyWay lounge near Gate C12, open 24 hours","Quiet zone near Gate C08","Free Wi-Fi: SkyWay-Demo-DXB"],tip:"Keep your passport and travel documents handy."},
+{code:"SIN",city:"Singapore",name:"Singapore Changi",terminal:"T4",transfer:"Shuttle connection to the airport train station",amenities:["SkyWay lounge near Gate D06, open 24 hours","Family zone near Gate D03","Free Wi-Fi: SkyWay-Demo-SIN"],tip:"Follow transfer signs if connecting to another flight."},
+{code:"LHR",city:"London",name:"London Heathrow",terminal:"T2",transfer:"Rail and Underground connections to central London",amenities:["SkyWay lounge near Gate D09, 05:00-22:00","Charging points near Gate D07","Free Wi-Fi: SkyWay-Demo-LHR"],tip:"Check entry requirements before international travel."}
+];
+const money=value=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(value);
+function airportOptions(selected,any=false){return (any?'<option value="">Any airport</option>':"")+AIRPORTS.map(a=>`<option value="${a.code}" ${a.code===selected?"selected":""}>${a.city} (${a.code})</option>`).join("")}
+function searchFlights(from,to,cabin){
+return FLIGHTS.filter(f=>f.st!=="Cancelled"&&(!from||f.from===from)&&(!to||f.to===to))
+.map(f=>({...f,fare:FARES[f.no]*(cabin==="Business"?2.5:1)})).sort((a,b)=>a.fare-b.fare);
+}
+function findFlights(){
+m.innerHTML=`<h1>Find flights</h1><p class="mut">Sample one-way timetable, not date-specific. Prices in INR per adult, including demo taxes. No booking is made.</p>
+<form id="flight-search" class="card"><div class="fields"><div><label for="origin">From</label><select id="origin" class="sel">${airportOptions("HYD",true)}</select></div><div><label for="destination">To</label><select id="destination" class="sel">${airportOptions("DEL",true)}</select></div></div>
+<label for="cabin">Cabin</label><select id="cabin" class="sel"><option>Economy</option><option>Business</option></select><button class="action" type="submit">Search sample flights</button></form><div id="flight-results" aria-live="polite"></div>`;
+document.getElementById("flight-search").addEventListener("submit",event=>{event.preventDefault();flightResults()});flightResults();
+}
+function flightResults(){
+const from=document.getElementById("origin").value,to=document.getElementById("destination").value,cabin=document.getElementById("cabin").value,result=document.getElementById("flight-results");
+if(from&&from===to){result.innerHTML='<p role="alert">Choose different departure and arrival airports.</p>';return}
+const flights=searchFlights(from,to,cabin);
+result.innerHTML=`<p class="mut">${flights.length} sample flight(s) · Lowest fare first · Cancelled flights excluded</p>`+flights.map(f=>`<div class="card"><div class="row"><b>${f.no} · ${f.from} to ${f.to}</b><span class="badge ${f.st}">${f.st}</span></div><p>${f.fc} to ${f.tc}</p><p class="mut">Dep ${f.dep} · Arr ${f.arr} · Local airport times</p><div class="summary">${money(f.fare)}</div><span class="mut">${cabin} · One adult · Sample fare only</span></div>`).join("")+(flights.length?"":'<p>No sample flights on this route. Try HYD to DEL or DEL to DXB.</p>');
+}
+function seatLayout(p){
+const business=p.cls==="Business",letters=business?["A","B","C","D"]:["A","B","C","D","E","F"];
+return {letters,aisle:business?2:3,rows:business?[1,2,3,4]:[10,11,12,13,14,15,16,17],occupied:business?["1A","2D","3B"]:["10A","11C","12D","14B","15F","16C"]};
+}
+function availableSeat(p,seat){const layout=seatLayout(p);return layout.rows.some(row=>layout.letters.some(letter=>`${row}${letter}`===seat))&&!layout.occupied.includes(seat)}
+function storageWarning(message){const warning=document.getElementById("storage-warning");warning.textContent=message;warning.hidden=false}
+function loadSeats(){
+try{
+const raw=localStorage.getItem("skyway-seats");if(raw===null)return;
+const saved=JSON.parse(raw);
+if(!saved||typeof saved!=="object"||Array.isArray(saved)||Object.entries(saved).some(([pnr,seat])=>{const p=PASSES.find(pass=>pass.pnr===pnr);return !p||!availableSeat(p,seat)}))throw new Error("Invalid saved seats");
+PASSES.forEach(p=>{if(saved[p.pnr])p.seat=saved[p.pnr]});
+}catch(error){storageWarning("Saved seat choices could not be loaded. Default demo seats are shown; you can still choose a seat for this session.")}
+}
+function seats(i){
+const p=PASSES[i],layout=seatLayout(p);
+m.innerHTML=`<h1>Choose your seat</h1><label for="seat-pass">Demo boarding pass</label><select id="seat-pass" class="sel" onchange="seats(Number(this.value))">${PASSES.map((p,j)=>`<option value="${j}" ${i===j?"selected":""}>${p.no} · ${p.date} · ${p.cls}</option>`).join("")}</select>
+<div class="card"><h2>${p.no} · ${p.pax}</h2><p>Selected seat: <b>${p.seat}</b></p><p class="mut">Blue = selected · Grey = occupied · Outlined = available. A and ${layout.letters.at(-1)} are window seats. All seat changes are free in this demo.</p>
+<div class="seat-map" role="group" aria-label="${p.cls} seat map">${layout.rows.map(row=>`<div class="seat-row ${p.cls==="Business"?"business":""}"><span class="mut">${row}</span>${layout.letters.map((letter,j)=>{const seat=`${row}${letter}`;return `${j===layout.aisle?'<span class="aisle" aria-hidden="true"></span>':""}<button class="seat ${p.seat===seat?"selected":""}" aria-label="Seat ${seat}${layout.occupied.includes(seat)?", occupied":""}" aria-pressed="${p.seat===seat}" ${layout.occupied.includes(seat)?"disabled":""} onclick="chooseSeat(${i},'${seat}')">${seat}</button>`}).join("")}</div>`).join("")}</div>
+<p id="seat-message" role="status"></p><button class="action" onclick="tab(2);pass(${i})">View updated boarding pass</button></div>`;
+}
+function chooseSeat(i,seat){
+const p=PASSES[i];if(!p||!availableSeat(p,seat)){storageWarning("That seat is not available. Choose an outlined seat.");return}
+p.seat=seat;let saved=true;
+try{localStorage.setItem("skyway-seats",JSON.stringify(Object.fromEntries(PASSES.map(p=>[p.pnr,p.seat]))))}
+catch(error){saved=false;storageWarning("Device storage is unavailable. Your seat is updated for this session only and will reset when the app reloads.")}
+seats(i);document.getElementById("seat-message").textContent=`Seat ${seat} selected. ${saved?"Saved on this device.":"Updated for this session only."}`;
+document.querySelector(".seat.selected").focus();
+}
+const BAGGAGE={
+domestic:{label:"Domestic",Economy:15,Business:30,rate:600},
+international:{label:"International",Economy:25,Business:40,rate:1200}
+};
+function baggageEstimate(route,cabin,weight){const rule=BAGGAGE[route],allowance=rule[cabin],excess=Math.max(0,weight-allowance);return {allowance,excess,fee:Math.ceil(excess)*rule.rate,rate:rule.rate}}
+function baggage(){
+m.innerHTML=`<h1>Baggage calculator</h1><p class="mut">Illustrative SkyWay rules only, not real airline policy. Calculate the sample checked-baggage fee for one adult.</p>
+<form id="baggage-form" class="card"><div class="fields"><div><label for="bag-route">Route type</label><select id="bag-route" class="sel"><option value="domestic">Domestic (within India)</option><option value="international">International</option></select></div><div><label for="bag-cabin">Cabin</label><select id="bag-cabin" class="sel"><option>Economy</option><option>Business</option></select></div></div>
+<label for="bag-weight">Total checked baggage weight (kg)</label><input id="bag-weight" type="number" min="0" max="100" step="0.1" value="20" required aria-describedby="bag-help"><p id="bag-help" class="mut">Enter 0-100 kg in 0.1 kg increments. Excess is rounded up to the next whole kg for pricing.</p><button class="action" type="submit">Calculate sample fee</button></form>
+<div id="bag-result" aria-live="polite"></div><div class="card"><h2>Sample allowances</h2><p>Domestic: Economy 15 kg / Business 30 kg</p><p>International: Economy 25 kg / Business 40 kg</p><p class="mut">Cabin bag: 7 kg plus one small personal item in either cabin. Checked baggage: maximum 32 kg per bag; split heavier totals across bags. Oversized and special items are not covered by this calculator.</p></div>`;
+document.getElementById("baggage-form").addEventListener("submit",event=>{event.preventDefault();baggageResult()});baggageResult();
+}
+function baggageResult(){
+const input=document.getElementById("bag-weight"),result=document.getElementById("bag-result");
+if(!input.checkValidity()){result.innerHTML='<p role="alert">Enter a valid weight from 0 to 100 kg in 0.1 kg increments.</p>';return}
+const estimate=baggageEstimate(document.getElementById("bag-route").value,document.getElementById("bag-cabin").value,Number(input.value));
+result.innerHTML=`<div class="card"><h2>Your sample estimate</h2><p>Included: <b>${estimate.allowance} kg</b> · Excess: <b>${Number(estimate.excess.toFixed(1))} kg</b></p><div class="summary">${money(estimate.fee)}</div><p class="mut">${estimate.excess?`${Math.ceil(estimate.excess)} billable kg at ${money(estimate.rate)} per kg.`:"Within your included allowance. No excess fee."} Estimate only; no payment is collected.</p></div>`;
+}
+function airport(code){
+const a=AIRPORTS.find(a=>a.code===code);
+m.innerHTML=`<h1>Airport guide</h1><p class="mut">Sample locations, hours, transport and Wi-Fi names for exploring this demo. Verify actual details with the airport.</p>
+<label for="airport-choice">Choose an airport</label><select id="airport-choice" class="sel" onchange="airport(this.value)">${airportOptions(code)}</select>
+<div class="card"><div class="big">${a.code}</div><h2>${a.name}</h2><p>${a.city} · Sample SkyWay terminal: <b>${a.terminal}</b></p><h2>Amenities</h2><ul class="amenities">${a.amenities.map(item=>`<li>${item}</li>`).join("")}</ul></div>
+<div class="card"><h2>Getting to the city</h2><p>${a.transfer}</p><h2>Travel tip</h2><p>${a.tip}</p></div>`;
+}
+loadSeats();
 tab(1);
 </script></body></html>
